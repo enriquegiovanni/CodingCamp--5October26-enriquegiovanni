@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Timer Duration Configuration Test</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 20px auto;
+      padding: 20px;
+    }
+    .test-section {
+      margin: 20px 0;
+      padding: 15px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+    .test-result {
+      margin: 10px 0;
+      padding: 10px;
+      border-radius: 3px;
+    }
+    .pass {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+    .fail {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+    button {
+      margin: 5px;
+      padding: 8px 15px;
+      cursor: pointer;
+    }
+    .error-message {
+      color: red;
+      display: none;
+      margin-left: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Timer Duration Configuration Test</h1>
+  
+  <div class="test-section">
+    <h2>Test Widget</h2>
+    <div id="timer-widget" class="widget widget-timer">
+      <h3>Focus Timer</h3>
+      <div class="timer-display" id="timer-display">25:00</div>
+      <div class="timer-controls">
+        <button id="timer-start" class="btn-primary">Start</button>
+        <button id="timer-stop" class="btn-secondary" disabled>Stop</button>
+        <button id="timer-reset" class="btn-secondary">Reset</button>
+      </div>
+      <div class="timer-config">
+        <label for="timer-duration">Duration (minutes):</label>
+        <input type="number" id="timer-duration" min="1" max="60" value="25" />
+        <span class="error-message" id="timer-error"></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="test-section">
+    <h2>Manual Tests</h2>
+    <button onclick="testValidDuration()">Test Valid Duration (30 min)</button>
+    <button onclick="testInvalidDurationHigh()">Test Invalid Duration (100 min)</button>
+    <button onclick="testInvalidDurationLow()">Test Invalid Duration (0 min)</button>
+    <button onclick="testInvalidDurationNonNumeric()">Test Non-Numeric Input</button>
+    <button onclick="testPersistence()">Test Persistence</button>
+    <button onclick="clearStorage()">Clear Storage</button>
+  </div>
+
+  <div class="test-section">
+    <h2>Test Results</h2>
+    <div id="test-results"></div>
+  </div>
+
+  <script src="js/app.js"></script>
+  <script>
+    let testResults = [];
+
+    function addResult(testName, passed, details) {
+      const result = {
+        testName,
+        passed,
+        details,
+        timestamp: new Date().toLocaleTimeString()
+      };
+      testResults.push(result);
+      displayResults();
+    }
+
+    function displayResults() {
+      const container = document.getElementById('test-results');
+      container.innerHTML = testResults.map(result => `
+        <div class="test-result ${result.passed ? 'pass' : 'fail'}">
+          <strong>[${result.timestamp}] ${result.testName}</strong>: ${result.passed ? '✓ PASS' : '✗ FAIL'}
+          <br>${result.details}
+        </div>
+      `).join('');
+    }
+
+    function testValidDuration() {
+      const input = document.getElementById('timer-duration');
+      const display = document.getElementById('timer-display');
+      
+      // Set valid duration
+      input.value = '30';
+      input.dispatchEvent(new Event('change'));
+      
+      // Wait a moment for the change to process
+      setTimeout(() => {
+        const displayValue = display.textContent;
+        const errorVisible = document.getElementById('timer-error').style.display !== 'none';
+        
+        if (displayValue === '30:00' && !errorVisible) {
+          addResult('Valid Duration (30 min)', true, `Display shows: ${displayValue}, No error shown`);
+        } else {
+          addResult('Valid Duration (30 min)', false, `Display shows: ${displayValue}, Error visible: ${errorVisible}`);
+        }
+      }, 100);
+    }
+
+    function testInvalidDurationHigh() {
+      const input = document.getElementById('timer-duration');
+      const errorElement = document.getElementById('timer-error');
+      
+      // Set invalid duration (too high)
+      input.value = '100';
+      input.dispatchEvent(new Event('change'));
+      
+      // Wait a moment for the change to process
+      setTimeout(() => {
+        const errorVisible = errorElement.style.display !== 'none';
+        const errorText = errorElement.textContent;
+        
+        if (errorVisible && errorText.includes('between') && errorText.includes('60')) {
+          addResult('Invalid Duration High (100 min)', true, `Error shown: "${errorText}"`);
+        } else {
+          addResult('Invalid Duration High (100 min)', false, `Error not shown properly. Visible: ${errorVisible}, Text: "${errorText}"`);
+        }
+      }, 100);
+    }
+
+    function testInvalidDurationLow() {
+      const input = document.getElementById('timer-duration');
+      const errorElement = document.getElementById('timer-error');
+      
+      // Set invalid duration (too low)
+      input.value = '0';
+      input.dispatchEvent(new Event('change'));
+      
+      // Wait a moment for the change to process
+      setTimeout(() => {
+        const errorVisible = errorElement.style.display !== 'none';
+        const errorText = errorElement.textContent;
+        
+        if (errorVisible && errorText.includes('between')) {
+          addResult('Invalid Duration Low (0 min)', true, `Error shown: "${errorText}"`);
+        } else {
+          addResult('Invalid Duration Low (0 min)', false, `Error not shown properly. Visible: ${errorVisible}, Text: "${errorText}"`);
+        }
+      }, 100);
+    }
+
+    function testInvalidDurationNonNumeric() {
+      const input = document.getElementById('timer-duration');
+      const errorElement = document.getElementById('timer-error');
+      
+      // Set non-numeric input
+      input.value = 'abc';
+      input.dispatchEvent(new Event('change'));
+      
+      // Wait a moment for the change to process
+      setTimeout(() => {
+        const errorVisible = errorElement.style.display !== 'none';
+        const errorText = errorElement.textContent;
+        
+        if (errorVisible && errorText.includes('between')) {
+          addResult('Non-Numeric Input', true, `Error shown: "${errorText}"`);
+        } else {
+          addResult('Non-Numeric Input', false, `Error not shown properly. Visible: ${errorVisible}, Text: "${errorText}"`);
+        }
+      }, 100);
+    }
+
+    function testPersistence() {
+      const input = document.getElementById('timer-duration');
+      
+      // Set a specific duration
+      input.value = '45';
+      input.dispatchEvent(new Event('change'));
+      
+      // Wait and check if it's in storage
+      setTimeout(() => {
+        const storedValue = StorageManager.get('pomoDuration');
+        
+        if (storedValue === 45) {
+          addResult('Duration Persistence', true, `Duration persisted correctly: ${storedValue} minutes`);
+        } else {
+          addResult('Duration Persistence', false, `Expected 45, got: ${storedValue}`);
+        }
+      }, 100);
+    }
+
+    function clearStorage() {
+      localStorage.clear();
+      addResult('Storage Cleared', true, 'All storage cleared. Reload to test initialization with default values.');
+    }
+
+    // Automated test on load
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        // Test 1: Check initial display
+        const display = document.getElementById('timer-display');
+        const displayValue = display.textContent;
+        
+        if (displayValue === '25:00') {
+          addResult('Initial Display', true, `Display shows default: ${displayValue}`);
+        } else {
+          addResult('Initial Display', false, `Expected 25:00, got: ${displayValue}`);
+        }
+
+        // Test 2: Check if duration input is loaded
+        const input = document.getElementById('timer-duration');
+        const inputValue = input.value;
+        
+        if (inputValue === '25') {
+          addResult('Initial Input Value', true, `Input shows default: ${inputValue}`);
+        } else {
+          addResult('Initial Input Value', false, `Expected 25, got: ${inputValue}`);
+        }
+
+        // Test 3: Check if StorageManager is available
+        const available = StorageManager.isAvailable();
+        addResult('Storage Available', available, available ? 'Local Storage is available' : 'Local Storage is NOT available');
+      }, 500);
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="A personal productivity dashboard with time tracking, tasks, and quick links">
+  <title>Life Dashboard</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header with theme toggle -->
+    <header class="app-header">
+      <h1>Life Dashboard</h1>
+      <button id="theme-toggle" class="btn-icon" aria-label="Toggle theme">
+        <span class="theme-icon" aria-hidden="true">🌙</span>
+      </button>
+    </header>
+    
+    <!-- Main content area with widgets -->
+    <main class="app-main">
+      <!-- Top row: Greeting and Timer -->
+      <div class="widget-row">
+        <!-- Greeting Widget -->
+        <div id="greeting-widget" class="widget widget-greeting">
+          <div class="greeting-time" id="greeting-time">12:00</div>
+          <div class="greeting-date" id="greeting-date">Loading...</div>
+          <div class="greeting-message" id="greeting-message">Good day!</div>
+          <div class="greeting-input-group">
+            <input 
+              type="text" 
+              id="greeting-name-input" 
+              placeholder="Enter your name" 
+              maxlength="50"
+              aria-label="Your name"
+            />
+          </div>
+        </div>
+        
+        <!-- Timer Widget -->
+        <div id="timer-widget" class="widget widget-timer">
+          <h2>Focus Timer</h2>
+          <div class="timer-display" id="timer-display">25:00</div>
+          <div class="timer-controls">
+            <button id="timer-start" class="btn btn-primary">Start</button>
+            <button id="timer-stop" class="btn btn-secondary" disabled>Stop</button>
+            <button id="timer-reset" class="btn btn-secondary">Reset</button>
+          </div>
+          <div class="timer-config">
+            <label for="timer-duration">Duration (minutes):</label>
+            <input 
+              type="number" 
+              id="timer-duration" 
+              min="1" 
+              max="60" 
+              value="25"
+              aria-label="Timer duration in minutes"
+            />
+            <span class="error-message" id="timer-error" role="alert"></span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Bottom row: Todo and Links -->
+      <div class="widget-row">
+        <!-- Todo Widget -->
+        <div id="todo-widget" class="widget widget-todo">
+          <h2>Tasks</h2>
+          <div class="todo-input-group">
+            <input 
+              type="text" 
+              id="todo-input" 
+              placeholder="Add a new task..." 
+              maxlength="500"
+              aria-label="New task description"
+            />
+            <button id="todo-add" class="btn btn-primary">Add</button>
+          </div>
+          <span class="error-message" id="todo-error" role="alert"></span>
+          <div class="todo-sort">
+            <label for="todo-sort-select">Sort by:</label>
+            <select id="todo-sort-select" aria-label="Task sort order">
+              <option value="pending">Pending first</option>
+              <option value="completed">Completed first</option>
+              <option value="alpha">Alphabetical (A-Z)</option>
+            </select>
+          </div>
+          <ul id="todo-list" class="todo-list" role="list">
+            <!-- Task items rendered dynamically -->
+          </ul>
+        </div>
+        
+        <!-- Links Widget -->
+        <div id="links-widget" class="widget widget-links">
+          <h2>Quick Links</h2>
+          <div class="links-input-group">
+            <input 
+              type="text" 
+              id="link-label" 
+              placeholder="Label..." 
+              maxlength="100"
+              aria-label="Link label"
+            />
+            <input 
+              type="text" 
+              id="link-url" 
+              placeholder="URL..." 
+              maxlength="500"
+              aria-label="Link URL"
+            />
+            <button id="link-add" class="btn btn-primary">Add</button>
+          </div>
+          <span class="error-message" id="link-error" role="alert"></span>
+          <div id="links-container" class="links-container" role="list">
+            <!-- Link buttons rendered dynamically -->
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+  
+  <script src="js/app.js"></script>
+</body>
+</html>

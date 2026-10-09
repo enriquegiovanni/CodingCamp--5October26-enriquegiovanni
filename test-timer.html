@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Timer Widget Test</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 600px;
+      margin: 50px auto;
+      padding: 20px;
+    }
+    .widget {
+      border: 2px solid #007bff;
+      padding: 20px;
+      border-radius: 8px;
+      background: #f8f9fa;
+    }
+    .timer-display {
+      font-size: 48px;
+      font-weight: bold;
+      text-align: center;
+      margin: 20px 0;
+      color: #333;
+    }
+    .timer-controls {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin: 20px 0;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .btn-primary {
+      background: #007bff;
+      color: white;
+    }
+    .btn-primary:disabled {
+      background: #6c757d;
+      cursor: not-allowed;
+    }
+    .btn-secondary {
+      background: #6c757d;
+      color: white;
+    }
+    .btn-secondary:disabled {
+      background: #adb5bd;
+      cursor: not-allowed;
+    }
+    .timer-config {
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid #dee2e6;
+    }
+    .timer-config label {
+      display: block;
+      margin-bottom: 5px;
+    }
+    .timer-config input {
+      padding: 8px;
+      font-size: 16px;
+      width: 100px;
+      border: 1px solid #ced4da;
+      border-radius: 4px;
+    }
+    .error-message {
+      color: #dc3545;
+      display: none;
+      margin-top: 5px;
+    }
+    .test-results {
+      margin-top: 30px;
+      padding: 15px;
+      border: 1px solid #28a745;
+      border-radius: 4px;
+      background: #d4edda;
+    }
+    .test-results h3 {
+      margin-top: 0;
+      color: #155724;
+    }
+    .test-item {
+      margin: 10px 0;
+      padding: 5px;
+    }
+    .test-pass {
+      color: #155724;
+    }
+    .test-fail {
+      color: #721c24;
+      background: #f8d7da;
+      padding: 5px;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Timer Widget Test</h1>
+  
+  <div id="timer-widget" class="widget widget-timer">
+    <h2>Focus Timer</h2>
+    <div class="timer-display" id="timer-display">25:00</div>
+    <div class="timer-controls">
+      <button id="timer-start" class="btn-primary">Start</button>
+      <button id="timer-stop" class="btn-secondary" disabled>Stop</button>
+      <button id="timer-reset" class="btn-secondary">Reset</button>
+    </div>
+    <div class="timer-config">
+      <label for="timer-duration">Duration (minutes):</label>
+      <input type="number" id="timer-duration" min="1" max="60" value="25" />
+      <span class="error-message" id="timer-error"></span>
+    </div>
+  </div>
+
+  <div class="test-results">
+    <h3>Test Results</h3>
+    <div id="test-results-container"></div>
+    <button onclick="runTests()" style="margin-top: 10px;">Run Tests</button>
+  </div>
+
+  <script src="js/app.js"></script>
+  <script>
+    // Initialize only the StorageManager and TimerWidget
+    if (typeof StorageManager !== 'undefined' && typeof TimerWidget !== 'undefined') {
+      TimerWidget.init('#timer-widget');
+      console.log('TimerWidget initialized');
+    }
+
+    // Test functions
+    function runTests() {
+      const resultsContainer = document.getElementById('test-results-container');
+      resultsContainer.innerHTML = '<p>Running tests...</p>';
+      const results = [];
+
+      // Test 1: Initial state
+      const display = document.getElementById('timer-display');
+      const startBtn = document.getElementById('timer-start');
+      const stopBtn = document.getElementById('timer-stop');
+      
+      results.push({
+        name: 'Initial state: Display shows 25:00',
+        pass: display.textContent === '25:00'
+      });
+      
+      results.push({
+        name: 'Initial state: Start button enabled',
+        pass: !startBtn.disabled
+      });
+      
+      results.push({
+        name: 'Initial state: Stop button disabled',
+        pass: stopBtn.disabled
+      });
+
+      // Test 2: Start timer
+      startBtn.click();
+      setTimeout(() => {
+        results.push({
+          name: 'After start: Start button disabled',
+          pass: startBtn.disabled
+        });
+        
+        results.push({
+          name: 'After start: Stop button enabled',
+          pass: !stopBtn.disabled
+        });
+
+        // Test 3: Stop (pause) timer
+        setTimeout(() => {
+          stopBtn.click();
+          
+          results.push({
+            name: 'After stop: Start button enabled (for resume)',
+            pass: !startBtn.disabled
+          });
+          
+          results.push({
+            name: 'After stop: Stop button disabled',
+            pass: stopBtn.disabled
+          });
+
+          // Test 4: Reset timer
+          document.getElementById('timer-reset').click();
+          
+          results.push({
+            name: 'After reset: Display returns to 25:00',
+            pass: display.textContent === '25:00'
+          });
+          
+          results.push({
+            name: 'After reset: Start button enabled',
+            pass: !startBtn.disabled
+          });
+          
+          results.push({
+            name: 'After reset: Stop button disabled',
+            pass: stopBtn.disabled
+          });
+
+          // Test 5: Set custom duration
+          const durationInput = document.getElementById('timer-duration');
+          durationInput.value = '10';
+          durationInput.dispatchEvent(new Event('change'));
+          
+          setTimeout(() => {
+            results.push({
+              name: 'After setting duration to 10: Display shows 10:00',
+              pass: display.textContent === '10:00'
+            });
+
+            // Test 6: Invalid duration
+            durationInput.value = '100';
+            durationInput.dispatchEvent(new Event('change'));
+            
+            setTimeout(() => {
+              const errorElement = document.getElementById('timer-error');
+              results.push({
+                name: 'Invalid duration (100): Error message shown',
+                pass: errorElement.textContent.includes('between') && errorElement.style.display === 'inline'
+              });
+
+              // Display results
+              displayResults(results);
+            }, 100);
+          }, 100);
+        }, 2000); // Wait 2 seconds while timer is running
+      }, 100);
+    }
+
+    function displayResults(results) {
+      const container = document.getElementById('test-results-container');
+      let html = '';
+      let passCount = 0;
+      
+      results.forEach(result => {
+        if (result.pass) passCount++;
+        const cssClass = result.pass ? 'test-pass' : 'test-fail';
+        const icon = result.pass ? '✓' : '✗';
+        html += `<div class="test-item ${cssClass}">${icon} ${result.name}</div>`;
+      });
+      
+      html = `<p><strong>${passCount} of ${results.length} tests passed</strong></p>` + html;
+      container.innerHTML = html;
+    }
+  </script>
+</body>
+</html>
